@@ -15,22 +15,27 @@ float pH;
 float senSorValueSum;
 const float pump_feed = 4.347826; // ml/sec
 
+int time_min; // time_left
+int time_sec; // time_left
+
+
 int pHcount=0;
 
 void sensor_Read()
 {
     senSorValueSum = 0;
   
-  for(int l=1;l<=100;l++)
+  for(int l=1;l<=500;l++)
   {
     sensorValue = analogRead(analogInPin);            
     senSorValueSum = senSorValueSum + sensorValue;
 
   }
 
-sensorValue =senSorValueSum/100;  
-pH = 7.8 - ((0.026315789473684210526315789473684*sensorValue)-12.421052631578947368421052631579);
+sensorValue =senSorValueSum/500;  
 
+pH = 1-((0.026315789473684210526315789473684*sensorValue)-23.647369);
+//pH = ((sensorValue-745.375)/-25.625);
 }
 
 void setup() {
@@ -57,20 +62,20 @@ sensor_Read();
   Serial.println(sensorValue);
   delay(50);             
 
-    lcd.setCursor(0, 1);
-      lcd.print("Monitoring Mode");
+  lcd.setCursor(0, 1);
+  lcd.print("Monitoring Mode");
   lcd.setCursor(0, 2);
   lcd.print("pH = ");
   lcd.print(pH,1);
   lcd.print("  EC = --");
   lcd.setCursor(0, 3);
   lcd.print("Temp = --");
-  //lcd.setCursor(0, 2);
+  //lcd.setCursor(0, 3);
   //lcd.print("ADC = ");
   //lcd.print(sensorValue);
 
   
-  delay(3000);
+  delay(500);
      
 }
 
@@ -86,6 +91,7 @@ void doSomething() // do after tick
     ml_feed = (pH - 6.0)/0.009;
     pump_time = ml_feed/pump_feed;
     
+    
       Serial.print("pH = " );                       
       Serial.print(pH,1);      
       Serial.print("   ADC = " );                       
@@ -98,18 +104,46 @@ void doSomething() // do after tick
       Serial.print("\r\n");
       
       digitalWrite(7, LOW);
-      delay((int)pump_time*1000); 
+      lcd.setCursor(0, 1);
+      lcd.print("     Pump  ON      ");
+      
+      for(int k=0;k<pump_time;k++)
+       {
+          lcd.setCursor(0, 2);
+          lcd.print("Time Left ");
+          lcd.print((int)pump_time-k);
+          lcd.print(" s       ");
+          lcd.setCursor(0, 3);
+          lcd.print("                   ");
+          
+//          Serial.print("Pump left ");
+ //         Serial.print(pump_time-k);
+  //        Serial.print(" s\r\n");
+        delay(1000); 
+       }
+      //delay((int)pump_time*1000); 
       digitalWrite(7, HIGH);
       
       // wait for mixing time
       Serial.print("Mixing....");
       Serial.print("\r\n");
- 
-      lcd.setCursor(0, 3);
-      lcd.print("Mixing...");
+      
+      lcd.setCursor(0, 1);
+      lcd.print("     Mixing Mode    ");
   
-      for(int co=0;co<900;co++)
-        delay(1000);
+      int time_sec=900;
+       for(int k=0;k<time_sec;k++)
+       {
+         lcd.setCursor(0, 2);
+          lcd.print("Time Left ");
+          lcd.print(time_sec-k);
+          lcd.print(" s       ");
+          lcd.setCursor(0, 3);
+          lcd.print("                   ");
+         
+        delay(1000); 
+       }
+      
         
      Serial.print("Finished Mixing");
         
